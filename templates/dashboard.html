@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, temp, day %}
+{% block content %}
+
+{% if hottest %}
+{% set peak = hottest[0] %}
+<section class="hero reveal" style="--i:1">
+  <div>
+    <span class="lab">Highest temperature recorded in India</span>
+    <span class="big"><span data-n="{{ '%.1f'|format(peak.temperature) }}">0</span><sup>°C</sup></span>
+    <div class="where">{{ peak.region_name }}, {{ peak.state }}</div>
+    <div class="sub">{{ peak.station_name }} · {{ day(peak.observation_date) }}</div>
+    {% if peak.temperature > hot_limit %}
+      <span class="tag">{{ '%.1f'|format(peak.temperature - hot_limit) }} °C above the {{ hot_limit }} °C danger line</span>
+    {% endif %}
+  </div>
+  <svg class="map" id="map" data-pins='{{ pins|tojson }}' viewBox="0 0 150 165" role="img" aria-label="Map of India with the hottest place marked"><path pathLength="1"/><g></g></svg>
+  <div class="next">
+    <h3>Next hottest stations</h3>
+    {% for h in hottest[1:] %}
+      {% set w = [(h.temperature|float) / 50 * 100, 100]|min %}
+      <div class="nx"><span>{{ h.station_name }}</span><div class="tr"><i data-w="{{ w|round(1) }}" style="--w:{{ w|round(1) }}%"></i></div><b>{{ '%.1f'|format(h.temperature) }} °C</b></div>
+    {% else %}<p class="muted">No other stations have readings yet.</p>{% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if map_points %}
+<section class="card reveal" style="--i:2">
+  <div class="hsm-head">
+    <div><div class="hsm-eyebrow">Regional monitoring</div><h2>Heat Severity Map</h2></div>
+    <span class="hsm-note">SCHEMATIC BORDERS</span>
+  </div>
+  <div class="hsm-grid">
+    <div class="hsm-panel" id="hsm"></div>
+    <div id="hsm-side">
+      <div id="hsm-list">
+        <div class="hsm-sub">Hottest regions</div>
+        <div id="hsm-rank"></div>
+        <p class="hsm-foot">Ranked by latest forecast max temperature. Click a row or a state to zoom.</p>
+      </div>
+      <div id="hsm-detail" hidden></div>
+    </div>
+  </div>
+  <script id="map-data" type="application/json">{{ map_points|tojson }}</script>
+</section>
+{% endif %}
+
+<section class="kpis">
+  <div class="card kpi reveal" style="--i:2"><small>Regions</small><span class="num" data-n="{{ kpi.regions }}">0</span></div>
+  <div class="card kpi reveal" style="--i:3"><small>Weather stations</small><span class="num" data-n="{{ kpi.stations }}">0</span></div>
+  <div class="card kpi reveal" style="--i:4"><small>Latest forecasts</small><span class="num" data-n="{{ kpi.forecasts }}">0</span></div>
+  <div class="card kpi reveal" style="--i:5"><small>Active advisories</small><span class="num" data-n="{{ kpi.advisories }}">0</span></div>
+</section>
+
+<section class="grid">
+  <div class="card reveal" style="--i:6">
+    <h3>Severity by region <a href="{{ url_for('forecasts') }}">All forecasts</a></h3>
+    {% for r in severity_by_region %}
+      <div class="row {{ r.severity_level or 'NONE' }}">
+        <a href="{{ url_for('region_detail', region_id=r.region_id) }}">{{ r.region_name }}</a>
+        <div class="track"><div class="fill" data-w="{{ r.percent }}" style="--w:{{ r.percent }}%"></div></div>
+        <span class="t">{{ temp(r.max_temperature, hot_limit) }}</span>
+      </div>
+    {% endfor %}
+    <div class="legend"><span class="LOW">Low</span><span class="MODERATE">Moderate</span><span class="HIGH">High</span><span class="SEVERE">Severe</span></div>
+  </div>
+
+  <div class="card reveal" style="--i:7">
+    <h3>Recent advisories <a href="{{ url_for('advisories') }}">View all</a></h3>
+    {% for a in advisories %}
+      <a class="adv {{ a.alert_level }}" href="{{ url_for('advisory_detail', advisory_id=a.advisory_id) }}">
+        <b>{{ a.region_name }} <small>{{ a.advisory_date.strftime('%d %b') }}</small></b>
+        <p>{{ a.message|truncate(90) }}</p>
+      </a>
+    {% else %}<div class="empty">No advisories yet.</div>{% endfor %}
+  </div>
+</section>
+
+<section class="grid">
+  <div class="card reveal" style="--i:8">
+    <h3>Latest observations <a href="{{ url_for('observations') }}">View all</a></h3>
+    <div class="wrap"><table>
+      <thead><tr><th>Date</th><th>Station</th><th>Region</th><th>Temp</th><th>Humidity</th></tr></thead>
+      <tbody>
+      {% for o in observations %}
+        <tr><td>{{ day(o.observation_date) }}</td><td>{{ o.station_name }}</td><td>{{ o.region_name }}</td><td>{{ temp(o.temperature, hot_limit) }}</td><td>{{ o.humidity }}%</td></tr>
+      {% else %}<tr><td colspan="5" class="empty">No observations yet.</td></tr>{% endfor %}
+      </tbody>
+    </table></div>
+  </div>
+
+  <div class="card reveal" style="--i:9">
+    <h3>Latest forecasts <a href="{{ url_for('forecasts') }}">View all</a></h3>
+    <div class="wrap"><table>
+      <thead><tr><th>Date</th><th>Region</th><th>Max</th><th>Severity</th></tr></thead>
+      <tbody>
+      {% for f in forecasts %}
+        <tr><td>{{ day(f.forecast_date) }}</td><td>{{ f.region_name }}</td><td>{{ temp(f.max_temperature, hot_limit) }}</td><td>{{ badge(f.severity_level) }}</td></tr>
+      {% else %}<tr><td colspan="4" class="empty">No forecasts yet.</td></tr>{% endfor %}
+      </tbody>
+    </table></div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/india-map.js') }}"></script>
+<script src="{{ url_for('static', filename='js/map-detail.js') }}"></script>
+{% endblock %}

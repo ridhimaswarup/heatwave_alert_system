@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, temp, day %}
+{% block title %}{{ region.region_name }}{% endblock %}
+{% block heading %}{{ region.region_name }}{% endblock %}
+{% block sub %}{{ region.state }} · {{ region.climate_zone }}{% endblock %}
+{% block content %}
+<a class="back" href="{{ url_for('regions') }}">← All regions</a>
+<section class="grid">
+  <div class="card">
+    <h3>Stations</h3>
+    <div class="wrap"><table>
+      <thead><tr><th>Name</th><th>Latitude</th><th>Longitude</th><th>Status</th></tr></thead>
+      <tbody>{% for s in stations %}
+        <tr><td>{{ s.station_name }}</td><td>{{ s.latitude }}</td><td>{{ s.longitude }}</td><td>{{ s.status }}</td></tr>
+      {% else %}<tr><td colspan="4" class="empty">No stations in this region.</td></tr>{% endfor %}</tbody>
+    </table></div>
+  </div>
+  <div class="card">
+    <h3>Advisories</h3>
+    {% for a in advisories %}
+      <a class="adv {{ a.alert_level }}" href="{{ url_for('advisory_detail', advisory_id=a.advisory_id) }}">
+        <b>{{ a.alert_level|capitalize }} <small>{{ day(a.advisory_date) }}</small></b><p>{{ a.message|truncate(90) }}</p></a>
+    {% else %}<div class="empty">No advisories.</div>{% endfor %}
+  </div>
+</section>
+<section class="grid">
+  <div class="card">
+    <h3>Observations</h3>
+    <div class="wrap"><table>
+      <thead><tr><th>Date</th><th>Station</th><th>Temp</th><th>Humidity</th></tr></thead>
+      <tbody>{% for o in observations %}
+        <tr><td>{{ day(o.observation_date) }}</td><td>{{ o.station_name }}</td><td>{{ temp(o.temperature, 40) }}</td><td>{{ o.humidity }}%</td></tr>
+      {% else %}<tr><td colspan="4" class="empty">No observations.</td></tr>{% endfor %}</tbody>
+    </table></div>
+  </div>
+  <div class="card">
+    <h3>Forecasts</h3>
+    <div class="wrap"><table>
+      <thead><tr><th>Date</th><th>Max</th><th>Severity</th></tr></thead>
+      <tbody>{% for f in forecasts %}
+        <tr><td>{{ day(f.forecast_date) }}</td><td>{{ temp(f.max_temperature, 40) }}</td><td>{{ badge(f.severity_level) }}</td></tr>
+      {% else %}<tr><td colspan="3" class="empty">No forecasts.</td></tr>{% endfor %}</tbody>
+    </table></div>
+  </div>
+</section>
+{% endblock %}

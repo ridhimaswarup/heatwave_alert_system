@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}{{ mode }} station{% endblock %}
+{% block heading %}{{ mode }} station{% endblock %}
+{% block sub %}Fill in the details below{% endblock %}
+{% block content %}
+<a class="back" href="{{ url_for('stations') }}">← All stations</a>
+<form class="card form-card" method="post">
+  <div class="field"><label for="station_name">Station name</label>
+    <input id="station_name" name="station_name" value="{{ station.station_name }}" maxlength="100" required></div>
+  <div class="two">
+    <div class="field"><label for="latitude">Latitude</label>
+      <input id="latitude" name="latitude" value="{{ station.latitude }}" placeholder="e.g. 21.14" required></div>
+    <div class="field"><label for="longitude">Longitude</label>
+      <input id="longitude" name="longitude" value="{{ station.longitude }}" placeholder="e.g. 79.08" required></div>
+  </div>
+  <div class="two">
+    <div class="field"><label for="region_id">Region</label>
+      <select id="region_id" name="region_id" required>
+        <option value="">Choose a region</option>
+        {% for r in regions %}<option value="{{ r.region_id }}" {{ 'selected' if station.region_id == r.region_id }}>{{ r.region_name }}</option>{% endfor %}
+      </select></div>
+    <div class="field"><label for="status">Status</label>
+      <select id="status" name="status">
+        {% for s in statuses %}<option {{ 'selected' if station.status == s }}>{{ s }}</option>{% endfor %}
+      </select></div>
+  </div>
+  <button class="btn">Save station</button>
+  <a class="btn ghost" href="{{ url_for('stations') }}">Cancel</a>
+</form>
+{% endblock %}

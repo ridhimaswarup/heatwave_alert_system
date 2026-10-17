@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Stations{% endblock %}
+{% block heading %}Weather stations{% endblock %}
+{% block sub %}Where temperature and humidity are measured{% endblock %}
+{% block content %}
+<form class="toolbar" method="get">
+  <input name="q" value="{{ q or '' }}" placeholder="Station or region">
+  <select name="status" onchange="this.form.submit()">
+    <option value="">Any status</option>
+    {% for s in statuses %}<option {{ 'selected' if s == status }}>{{ s }}</option>{% endfor %}
+  </select>
+  <button class="btn">Filter</button>
+  {% if q or status %}<a class="btn ghost" href="{{ url_for('stations') }}">Clear</a>{% endif %}
+  <a class="btn grow" href="{{ url_for('station_add') }}">Add station</a>
+</form>
+<div class="card wrap"><table>
+  <thead><tr><th>ID</th><th>Station</th><th>Region</th><th>Latitude</th><th>Longitude</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for s in stations %}
+    <tr><td>{{ s.station_id }}</td><td>{{ s.station_name }}</td><td>{{ s.region_name }}</td><td>{{ s.latitude }}</td><td>{{ s.longitude }}</td>
+      <td><span class="badge {{ 'LOW' if s.status == 'Active' else 'NONE' }}">{{ s.status }}</span></td>
+      <td class="actions">
+        <a class="btn ghost small" href="{{ url_for('station_edit', station_id=s.station_id) }}">Edit</a>
+      </td></tr>
+  {% else %}<tr><td colspan="7" class="empty">No stations match your filters.</td></tr>{% endfor %}
+  </tbody>
+</table></div>
+{% endblock %}

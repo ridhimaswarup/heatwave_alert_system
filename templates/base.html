@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Dashboard{% endblock %} · HeatWatch</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<aside>
+  <div class="brand"><span class="sun"></span>HeatWatch</div>
+  {% set nav = [
+    ('dashboard', 'Dashboard', ['dashboard']),
+    ('regions', 'Regions', ['regions', 'region_detail']),
+    ('stations', 'Stations', ['stations', 'station_add', 'station_edit']),
+    ('observations', 'Observations', ['observations']),
+    ('forecasts', 'Forecasts', ['forecasts']),
+    ('advisories', 'Advisories', ['advisories', 'advisory_detail', 'advisory_add', 'advisory_edit']),
+    ('stakeholders', 'Stakeholders', ['stakeholders'])] %}
+  <nav>
+    {% for endpoint, label, group in nav %}
+      <a href="{{ url_for(endpoint) }}" class="{{ 'on' if request.endpoint in group }}"><i></i>{{ label }}</a>
+    {% endfor %}
+  </nav>
+  <div class="side-foot">Heatwave early warning system</div>
+</aside>
+
+<main>
+  <div class="top reveal">
+    <div><h1>{% block heading %}Dashboard{% endblock %}</h1><p>{% block sub %}{{ today }}{% endblock %}</p></div>
+    <form class="search" action="{{ url_for('search') }}" method="get">
+      <input name="q" value="{{ request.args.get('q', '') if request.endpoint == 'search' }}" placeholder="Search regions, stations, advisories" aria-label="Search">
+      <button class="btn">Search</button>
+    </form>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</main>
+
+{% block scripts %}{% endblock %}
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge %}
+{% block title %}Regions{% endblock %}
+{% block heading %}Regions{% endblock %}
+{% block sub %}Every region and its latest heat severity{% endblock %}
+{% block content %}
+<form class="toolbar" method="get">
+  <input name="q" value="{{ q or '' }}" placeholder="Name, state or climate zone">
+  <select name="state" onchange="this.form.submit()">
+    <option value="">All states</option>
+    {% for s in states %}<option value="{{ s.state }}" {{ 'selected' if s.state == state }}>{{ s.state }}</option>{% endfor %}
+  </select>
+  <button class="btn">Filter</button>
+  {% if q or state %}<a class="btn ghost" href="{{ url_for('regions') }}">Clear</a>{% endif %}
+</form>
+<div class="card wrap"><table>
+  <thead><tr><th>ID</th><th>Region</th><th>State</th><th>Climate zone</th><th>Stations</th><th>Latest severity</th></tr></thead>
+  <tbody>
+  {% for r in regions %}
+    <tr><td>{{ r.region_id }}</td><td><a href="{{ url_for('region_detail', region_id=r.region_id) }}">{{ r.region_name }}</a></td>
+        <td>{{ r.state }}</td><td>{{ r.climate_zone }}</td><td>{{ r.station_count }}</td><td>{{ badge(r.latest_severity) }}</td></tr>
+  {% else %}<tr><td colspan="6" class="empty">No regions match your filters.</td></tr>{% endfor %}
+  </tbody>
+</table></div>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, temp, day %}
+{% block title %}Forecasts{% endblock %}
+{% block heading %}Heatwave forecasts{% endblock %}
+{% block sub %}Predicted maximum temperature by region{% endblock %}
+{% block content %}
+<form class="toolbar" method="get">
+  <select name="severity" onchange="this.form.submit()" aria-label="Severity">
+    <option value="">Any severity</option>
+    {% for s in severities %}<option value="{{ s }}" {{ 'selected' if s == severity }}>{{ s|capitalize }}</option>{% endfor %}
+  </select>
+  <select name="region_id" onchange="this.form.submit()" aria-label="Region">
+    <option value="">All regions</option>
+    {% for r in regions %}<option value="{{ r.region_id }}" {{ 'selected' if r.region_id == region_id }}>{{ r.region_name }}</option>{% endfor %}
+  </select>
+  <a class="btn ghost" href="{{ url_for('forecasts') }}">Clear</a>
+</form>
+{% if forecasts %}
+<div class="card"><h3>Max temperature by date</h3><div class="chart-box"><canvas id="chart" data-chart='{{ chart|tojson }}'></canvas></div></div>
+{% endif %}
+<div class="card wrap"><table>
+  <thead><tr><th>ID</th><th>Date</th><th>Region</th><th>Max temperature</th><th>Severity</th></tr></thead>
+  <tbody>
+  {% for f in forecasts %}
+    <tr><td>{{ f.forecast_id }}</td><td>{{ day(f.forecast_date) }}</td><td>{{ f.region_name }}</td><td>{{ temp(f.max_temperature, hot_limit) }}</td><td>{{ badge(f.severity_level) }}</td></tr>
+  {% else %}<tr><td colspan="5" class="empty">No forecasts match your filters.</td></tr>{% endfor %}
+  </tbody>
+</table></div>
+{% endblock %}
+{% block scripts %}<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>{% endblock %}

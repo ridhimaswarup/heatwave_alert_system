@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, temp, day %}
+{% block title %}Advisory #{{ advisory.advisory_id }}{% endblock %}
+{% block heading %}Advisory #{{ advisory.advisory_id }}{% endblock %}
+{% block sub %}{{ advisory.region_name }}, {{ advisory.state }} · {{ day(advisory.advisory_date) }}{% endblock %}
+{% block content %}
+<a class="back" href="{{ url_for('advisories') }}">← All advisories</a>
+<div class="card">
+  <p class="lead"><span class="badge {{ advisory.alert_level }}">{{ advisory.alert_level|capitalize }}</span>&nbsp; {{ advisory.message }}</p>
+  <div class="facts">
+    <div><small>Region</small><strong><a href="{{ url_for('region_detail', region_id=advisory.region_id) }}">{{ advisory.region_name }}</a></strong></div>
+    <div><small>Forecast #{{ advisory.forecast_id }}</small><strong>{{ temp(advisory.max_temperature, 40) }}</strong></div>
+    <div><small>Forecast severity</small><strong>{{ badge(advisory.severity_level) }}</strong></div>
+  </div>
+  <div class="toolbar" style="margin:18px 0 0">
+    <a class="btn ghost small" href="{{ url_for('advisory_edit', advisory_id=advisory.advisory_id) }}">Edit</a>
+    <form class="inline" method="post" action="{{ url_for('advisory_delete', advisory_id=advisory.advisory_id) }}" onsubmit="return confirm('Delete this advisory?')">
+      <button class="btn danger small">Delete</button></form>
+  </div>
+</div>
+<div class="card wrap">
+  <h3>Stakeholders notified</h3>
+  <table>
+    <thead><tr><th>Name</th><th>Type</th><th>Contact</th><th>Region</th></tr></thead>
+    <tbody>
+    {% for s in stakeholders %}
+      <tr><td>{{ s.stakeholder_name }}</td><td>{{ s.stakeholder_type }}</td><td>{{ s.contact_no }}</td><td>{{ s.region_name }}</td></tr>
+    {% else %}<tr><td colspan="4" class="empty">No stakeholders linked to this advisory.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

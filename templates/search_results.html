@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% from "_macros.html" import day %}
+{% block title %}Search{% endblock %}
+{% block heading %}Search{% endblock %}
+{% block sub %}{% if q %}{{ total }} result{{ '' if total == 1 else 's' }} for “{{ q }}”{% else %}Type something in the search box{% endif %}{% endblock %}
+{% block content %}
+{% if q and total == 0 %}<div class="card empty">Nothing found. Try a region, station, state or alert level.</div>{% endif %}
+
+{% if results.regions %}<div class="card wrap"><h3>Regions</h3><table><tbody>
+  {% for r in results.regions %}<tr><td><a href="{{ url_for('region_detail', region_id=r.region_id) }}">{{ r.region_name }}</a></td><td>{{ r.state }}</td><td>{{ r.climate_zone }}</td></tr>{% endfor %}
+</tbody></table></div>{% endif %}
+
+{% if results.stations %}<div class="card wrap"><h3>Stations</h3><table><tbody>
+  {% for s in results.stations %}<tr><td>{{ s.station_name }}</td><td>{{ s.region_name }}</td><td>{{ s.status }}</td><td class="actions"><a href="{{ url_for('station_edit', station_id=s.station_id) }}">Edit</a></td></tr>{% endfor %}
+</tbody></table></div>{% endif %}
+
+{% if results.advisories %}<div class="card wrap"><h3>Advisories</h3><table><tbody>
+  {% for a in results.advisories %}<tr><td>{{ day(a.advisory_date) }}</td><td><span class="badge {{ a.alert_level }}">{{ a.alert_level|capitalize }}</span></td><td>{{ a.region_name }}</td>
+    <td><a href="{{ url_for('advisory_detail', advisory_id=a.advisory_id) }}">{{ a.message|truncate(80) }}</a></td></tr>{% endfor %}
+</tbody></table></div>{% endif %}
+
+{% if results.stakeholders %}<div class="card wrap"><h3>Stakeholders</h3><table><tbody>
+  {% for s in results.stakeholders %}<tr><td>{{ s.stakeholder_name }}</td><td>{{ s.stakeholder_type }}</td><td>{{ s.region_name }}</td></tr>{% endfor %}
+</tbody></table></div>{% endif %}
+{% endblock %}

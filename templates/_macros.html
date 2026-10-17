@@ -1,0 +1,9 @@
+{% macro badge(level) -%}
+  {%- if level %}<span class="badge {{ level }}">{{ level|capitalize }}</span>{% else %}<span class="muted">No forecast</span>{% endif -%}
+{%- endmacro %}
+
+{% macro temp(value, limit) -%}
+  {%- if value is not none %}<span class="{{ 'hot' if value > limit }}">{{ '%.1f'|format(value) }} °C</span>{% else %}–{% endif -%}
+{%- endmacro %}
+
+{% macro day(d) -%}{{ d.strftime('%d %b %Y') if d else '–' }}{%- endmacro %}

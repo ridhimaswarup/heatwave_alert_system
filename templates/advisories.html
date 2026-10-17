@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% from "_macros.html" import day %}
+{% block title %}Advisories{% endblock %}
+{% block heading %}Advisories{% endblock %}
+{% block sub %}Warnings issued to the public and stakeholders{% endblock %}
+{% block content %}
+<form class="toolbar" method="get">
+  <input name="q" value="{{ q or '' }}" placeholder="Message or region">
+  <select name="level" onchange="this.form.submit()" aria-label="Alert level">
+    <option value="">Any level</option>
+    {% for l in levels %}<option value="{{ l }}" {{ 'selected' if l == level }}>{{ l|capitalize }}</option>{% endfor %}
+  </select>
+  <button class="btn">Filter</button>
+  {% if q or level %}<a class="btn ghost" href="{{ url_for('advisories') }}">Clear</a>{% endif %}
+  <a class="btn grow" href="{{ url_for('advisory_add') }}">New advisory</a>
+</form>
+<div class="card wrap"><table>
+  <thead><tr><th>ID</th><th>Date</th><th>Level</th><th>Region</th><th>Message</th><th></th></tr></thead>
+  <tbody>
+  {% for a in advisories %}
+    <tr><td>{{ a.advisory_id }}</td><td>{{ day(a.advisory_date) }}</td>
+      <td><span class="badge {{ a.alert_level }}">{{ a.alert_level|capitalize }}</span></td><td>{{ a.region_name }}</td>
+      <td><a href="{{ url_for('advisory_detail', advisory_id=a.advisory_id) }}">{{ a.message|truncate(70) }}</a></td>
+      <td class="actions">
+        <a class="btn ghost small" href="{{ url_for('advisory_edit', advisory_id=a.advisory_id) }}">Edit</a>
+        <form class="inline" method="post" action="{{ url_for('advisory_delete', advisory_id=a.advisory_id) }}" onsubmit="return confirm('Delete advisory #{{ a.advisory_id }}? This cannot be undone.')">
+          <button class="btn danger small">Delete</button></form>
+      </td></tr>
+  {% else %}<tr><td colspan="6" class="empty">No advisories match your filters.</td></tr>{% endfor %}
+  </tbody>
+</table></div>
+{% endblock %}

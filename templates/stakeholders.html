@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Stakeholders{% endblock %}
+{% block heading %}Stakeholders{% endblock %}
+{% block sub %}People and organisations who receive advisories{% endblock %}
+{% block content %}
+<form class="toolbar" method="get">
+  <input name="q" value="{{ q or '' }}" placeholder="Name, region or contact">
+  <select name="type" onchange="this.form.submit()" aria-label="Type">
+    <option value="">All types</option>
+    {% for t in types %}<option {{ 'selected' if t.stakeholder_type == stype }}>{{ t.stakeholder_type }}</option>{% endfor %}
+  </select>
+  <button class="btn">Filter</button>
+  {% if q or stype %}<a class="btn ghost" href="{{ url_for('stakeholders') }}">Clear</a>{% endif %}
+</form>
+<div class="card wrap"><table>
+  <thead><tr><th>ID</th><th>Name</th><th>Type</th><th>Region</th><th>Contact</th><th>Advisories</th></tr></thead>
+  <tbody>
+  {% for s in stakeholders %}
+    <tr><td>{{ s.stakeholder_id }}</td><td>{{ s.stakeholder_name }}</td><td>{{ s.stakeholder_type }}</td><td>{{ s.region_name }}</td><td>{{ s.contact_no }}</td>
+      <td>{% for l in links.get(s.stakeholder_id, []) %}<a class="chip {{ l.alert_level }}" href="{{ url_for('advisory_detail', advisory_id=l.advisory_id) }}">#{{ l.advisory_id }}</a>{% else %}<span class="muted">None</span>{% endfor %}</td></tr>
+  {% else %}<tr><td colspan="6" class="empty">No stakeholders match your filters.</td></tr>{% endfor %}
+  </tbody>
+</table></div>
+{% endblock %}

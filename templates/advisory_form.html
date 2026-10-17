@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% from "_macros.html" import day %}
+{% block title %}{{ mode }} advisory{% endblock %}
+{% block heading %}{{ mode }} advisory{% endblock %}
+{% block sub %}Choose a forecast, set the alert level and pick who to notify{% endblock %}
+{% block content %}
+<a class="back" href="{{ url_for('advisories') }}">← All advisories</a>
+<form class="card form-card" method="post" style="max-width:820px">
+  <div class="field"><label for="forecast_id">Forecast</label>
+    <select id="forecast_id" name="forecast_id" required>
+      <option value="">Choose a forecast</option>
+      {% for f in forecast_options %}
+        <option value="{{ f.forecast_id }}" {{ 'selected' if advisory.forecast_id == f.forecast_id }}>{{ f.region_name }} · {{ day(f.forecast_date) }} · {{ f.severity_level|capitalize }}</option>
+      {% endfor %}
+    </select></div>
+  <div class="two">
+    <div class="field"><label for="advisory_date">Advisory date</label>
+      <input id="advisory_date" type="date" name="advisory_date" value="{{ advisory.advisory_date or '' }}" required></div>
+    <div class="field"><label for="alert_level">Alert level</label>
+      <select id="alert_level" name="alert_level">
+        {% for l in levels %}<option value="{{ l }}" {{ 'selected' if advisory.alert_level == l }}>{{ l|capitalize }}</option>{% endfor %}
+      </select></div>
+  </div>
+  <div class="field"><label for="message">Message</label>
+    <textarea id="message" name="message" rows="4" minlength="10" required>{{ advisory.message }}</textarea></div>
+  <fieldset class="field" style="border:0;padding:0;margin:0 0 16px"><legend>Stakeholders to notify</legend>
+    <div class="checks">
+      {% for s in stakeholder_options %}
+        <label><input type="checkbox" name="stakeholder_ids" value="{{ s.stakeholder_id }}" {{ 'checked' if s.stakeholder_id in advisory.stakeholder_ids }}>
+          <span>{{ s.stakeholder_name }} <small class="muted">· {{ s.region_name }}</small></span></label>
+      {% endfor %}
+    </div></fieldset>
+  <button class="btn">Save advisory</button>
+  <a class="btn ghost" href="{{ url_for('advisories') }}">Cancel</a>
+</form>
+{% endblock %}
